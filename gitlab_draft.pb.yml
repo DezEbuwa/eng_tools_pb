@@ -1,0 +1,54 @@
+---
+- hosts: gitlab
+  become: yes
+  vars:
+    external_url: "http://gitlab.example.com"
+
+  tasks:
+  - name: Update YUM package manager repositories
+    yum:
+      name: "*"
+      state: latest
+
+  - name: Install necessary dependencies
+    yum:
+      name:
+        - curl
+        - policycoreutils
+        - openssh-server
+        - openssh-clients
+        - postfix
+      state: present
+
+  - name: Enable and start sshd and postfix
+    service:
+      name: "{{ item }}"
+      state: started
+      enabled: yes
+    loop:
+      - sshd
+      - postfix
+
+  - name: Add the GitLab package repository
+    shell:
+      cmd: |
+        curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ee/script.rpm.sh | sudo bash
+      args:
+        warn: no
+
+  - name: Install GitLab
+    yum:
+      name: gitlab-ee
+      state: present
+
+  - name: Change the external URL in the GitLab configuration.
+    replace:
+      path: /etc/gitlab/gitlab.rb
+      regexp: '# external_url'
+      replace: "external_url '{{ external_url }}'"
+      backup: yes
+
+  - name: Reconfigure GitLab to apply changes
+    command:
+      cmd: gitlab-ctl reconfigure
+      warn: no

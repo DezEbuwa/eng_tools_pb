@@ -1,0 +1,93 @@
+---
+- hosts: confluence
+  become: yes
+  vars:
+    confluence_version: 7.12.1
+    confluence_download_url: https://product-downloads.atlassian.com/software/confluence/downloads/atlassian-confluence-{{ confluence_version }}.tar.gz
+    confluence_install_dir: /opt/atlassian/confluence
+    confluence_data_dir: /var/atlassian/application-data/confluence
+    java_version: java-11-openjdk
+
+  tasks:
+  - name: Update all packages to the latest version
+    yum:
+      name: "*"
+      state: latest
+
+  - name: Install required packages
+    yum:
+      name:
+        - "{{ java_version }}"
+        - tar
+      state: present
+
+  - name: Create group confluence
+    group:
+      name: confluence
+      state: present
+
+  - name: Create user confluence
+    user:
+      name: confluence
+      group: confluence
+      home: "{{ confluence_install_dir }}"
+      create_home: no
+      shell: /sbin/nologin
+      system: yes
+      state: present
+
+  - name: Download Confluence
+    get_url:
+      url: "{{ confluence_download_url }}"
+      dest: "/tmp/atlassian-confluence-{{ confluence_version }}.tar.gz"
+
+  - name: Create installation and data directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0755'
+      owner: confluence
+      group: confluence
+    loop:
+      - "{{ confluence_install_dir }}"
+      - "{{ confluence_data_dir }}"
+
+  - name: Extract Confluence tar.gz
+    unarchive:
+      src: "/tmp/atlassian-confluence-{{ confluence_version }}.tar.gz"
+      dest: "{{ confluence_install_dir }}"
+      remote_src: yes
+      owner: confluence
+      group: confluence
+      creates: "{{ confluence_install_dir }}/atlassian-confluence-{{ confluence_version }}"
+
+  - name: Set confluence home directory in confluence-init.properties
+    replace:
+      path: "{{ confluence_install_dir }}/confluence/WEB-INF/classes/confluence-init.properties"
+      regexp: 'confluence.home ='
+      replace: "confluence.home = {{ confluence_data_dir }}"
+
+  - name: Change owner of installation and data directories to confluence
+    file:
+      path: "{{ item }}"
+      state: directory
+      recurse: yes
+      owner: confluence
+      group: confluence
+    loop:
+      - "{{ confluence_install_dir }}"
+      - "{{ confluence_data_dir }}"
+
+  - name: Install Confluence service
+    template:
+      src: /path/to/confluence.service.j2
+      dest: /etc/systemd/system/confluence.service
+      mode: '0644'
+    notify: restart confluence
+
+  handlers:
+  - name: restart confluence
+    systemd:
+      name: confluence
+      state: restarted
+      enabled: yes

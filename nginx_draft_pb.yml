@@ -1,0 +1,45 @@
+---
+- hosts: nginx_servers
+  become: yes
+
+  tasks:
+  - name: Install EPEL repository
+    dnf:
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+      state: present
+
+  - name: Install NGINX
+    dnf:
+      name: nginx
+      state: present
+
+  - name: Start and enable NGINX service
+    systemd:
+      name: nginx
+      state: started
+      enabled: yes
+
+  - name: Install firewalld
+    dnf:
+      name: firewalld
+      state: present
+
+  - name: Start and enable firewalld
+    systemd:
+      name: firewalld
+      state: started
+      enabled: yes
+
+  - name: Open port 80 for http traffic
+    firewalld:
+      service: http
+      permanent: true
+      state: enabled
+      immediate: yes
+
+  - name: Open port 443 for https traffic
+    firewalld:
+      service: https
+      permanent: true
+      state: enabled
+      immediate: yes

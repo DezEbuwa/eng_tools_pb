@@ -1,0 +1,87 @@
+---
+- hosts: openshift
+  become: yes
+  vars:
+    openshift_release: "4.7.0"
+    openshift_domain: "example.com"
+    openshift_cluster_name: "cluster1"
+    ansible_user: "your-ansible-user"
+    ansible_become: "yes"
+    ansible_ssh_private_key_file: "~/.ssh/id_rsa"
+  tasks:
+  - name: Install required packages
+    yum:
+      name: "{{ item }}"
+      state: latest
+    with_items:
+      - wget
+      - git
+      - net-tools
+      - bind-utils
+      - iptables-services
+      - bridge-utils
+      - bash-completion
+      - kexec-tools
+      - sos
+      - psacct
+      - atomic-openshift-clients
+      - docker
+
+  - name: Enable and Start Docker
+    systemd:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Download OpenShift installer
+    get_url:
+      url: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/{{ openshift_release }}/openshift-install-linux.tar.gz"
+      dest: "/tmp/openshift-install-linux.tar.gz"
+      mode: '0755'
+
+  - name: Unpack OpenShift installer
+    unarchive:
+      src: "/tmp/openshift-install-linux.tar.gz"
+      dest: "/usr/local/bin"
+      remote_src: yes
+
+  - name: Set permissions for OpenShift installer
+    file:
+      path: "/usr/local/bin/openshift-install"
+      mode: '0755'
+
+  - name: Create OpenShift install config
+    blockinfile:
+      path: /home/{{ ansible_user }}/install-config.yaml
+      create: yes
+      block: |
+        apiVersion: v1
+        baseDomain: {{ openshift_domain }}
+        compute:
+        - hyperthreading: Enabled
+          name: worker
+          replicas: 0
+        controlPlane:
+          hyperthreading: Enabled
+          name: master
+          replicas: 3
+        metadata:
+          name: {{ openshift_cluster_name }}
+        networking:
+          clusterNetwork:
+          - cidr: 10.128.0.0/14
+            hostPrefix: 23
+          networkType: OpenShiftSDN
+          serviceNetwork:
+          - 172.30.0.0/16
+        platform:
+          aws:
+            region: us-west-2
+        pullSecret: ''
+        sshKey: ''
+
+  - name: Create OpenShift Cluster
+    shell: "openshift-install create cluster --dir=/home/{{ ansible_user }}/ --log-level=info"
+    args:
+      chdir: "/home/{{ ansible_user }}/"
+      creates: "/home/{{ ansible_user }}/auth/kubeconfig"

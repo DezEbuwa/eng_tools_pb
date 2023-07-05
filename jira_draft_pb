@@ -1,0 +1,93 @@
+---
+- hosts: jira
+  become: yes
+  vars:
+    jira_version: 8.18.1
+    jira_download_url: https://product-downloads.atlassian.com/software/jira/downloads/atlassian-jira-software-{{ jira_version }}.tar.gz
+    jira_install_dir: /opt/atlassian/jira
+    jira_home_dir: /var/atlassian/application-data/jira
+    java_version: java-11-openjdk
+
+  tasks:
+  - name: Update all packages to the latest version
+    yum:
+      name: "*"
+      state: latest
+
+  - name: Install required packages
+    yum:
+      name:
+        - "{{ java_version }}"
+        - tar
+      state: present
+
+  - name: Create group jira
+    group:
+      name: jira
+      state: present
+
+  - name: Create user jira
+    user:
+      name: jira
+      group: jira
+      home: "{{ jira_install_dir }}"
+      create_home: no
+      shell: /sbin/nologin
+      system: yes
+      state: present
+
+  - name: Download JIRA
+    get_url:
+      url: "{{ jira_download_url }}"
+      dest: "/tmp/atlassian-jira-software-{{ jira_version }}.tar.gz"
+
+  - name: Create installation and home directories
+    file:
+      path: "{{ item }}"
+      state: directory
+      mode: '0755'
+      owner: jira
+      group: jira
+    loop:
+      - "{{ jira_install_dir }}"
+      - "{{ jira_home_dir }}"
+
+  - name: Extract JIRA tar.gz
+    unarchive:
+      src: "/tmp/atlassian-jira-software-{{ jira_version }}.tar.gz"
+      dest: "{{ jira_install_dir }}"
+      remote_src: yes
+      owner: jira
+      group: jira
+      creates: "{{ jira_install_dir }}/atlassian-jira-software-{{ jira_version }}"
+
+  - name: Set JIRA home directory in jira-application.properties
+    replace:
+      path: "{{ jira_install_dir }}/atlassian-jira/WEB-INF/classes/jira-application.properties"
+      regexp: 'jira.home ='
+      replace: "jira.home = {{ jira_home_dir }}"
+
+  - name: Change owner of installation and home directories to jira
+    file:
+      path: "{{ item }}"
+      state: directory
+      recurse: yes
+      owner: jira
+      group: jira
+    loop:
+      - "{{ jira_install_dir }}"
+      - "{{ jira_home_dir }}"
+
+  - name: Install JIRA service
+    template:
+      src: /path/to/jira.service.j2
+      dest: /etc/systemd/system/jira.service
+      mode: '0644'
+    notify: restart jira
+
+  handlers:
+  - name: restart jira
+    systemd:
+      name: jira
+      state: restarted
+      enabled: yes

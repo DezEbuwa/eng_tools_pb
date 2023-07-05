@@ -1,0 +1,9 @@
+[Unit]
+Description=JIRA
+After=network.target
+
+[Service]
+Type=forking
+User=jira
+PIDFile={{ jira_install_dir }}/work/catalina.pid
+ExecStart

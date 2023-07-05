@@ -1,0 +1,12 @@
+[Unit]
+Description=Teamwork Cloud
+After=network.target
+
+[Service]
+Type=simple
+User=twc
+ExecStart={{ teamwork_cloud_install_dir }}/twc-server-{{ teamwork_cloud_version }}/bin/startup.sh
+ExecStop={{ teamwork_cloud_install_dir }}/twc-server-{{ teamwork_cloud_version }}/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target

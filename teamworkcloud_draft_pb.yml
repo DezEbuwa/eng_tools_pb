@@ -1,0 +1,74 @@
+---
+- hosts: teamwork_cloud
+  become: yes
+  vars:
+    teamwork_cloud_version: 19.0
+    teamwork_cloud_download_url: "https://teamworkcloud.s3.amazonaws.com/installers/TWC/twc-server/twc-server-{{ teamwork_cloud_version }}-GA-bundle-linux64.zip"
+    teamwork_cloud_install_dir: /opt/teamworkcloud
+    java_version: java-11-openjdk
+    server_xml_template_path: "/path/to/server.xml.j2"
+
+  tasks:
+  - name: Update all packages to the latest version
+    yum:
+      name: "*"
+      state: latest
+
+  - name: Install required packages
+    yum:
+      name:
+        - "{{ java_version }}"
+        - unzip
+      state: present
+
+  - name: Create user twc
+    user:
+      name: twc
+      home: "{{ teamwork_cloud_install_dir }}"
+      shell: /sbin/nologin
+      system: yes
+      state: present
+
+  - name: Download Teamwork Cloud
+    get_url:
+      url: "{{ teamwork_cloud_download_url }}"
+      dest: "/tmp/twc-server-{{ teamwork_cloud_version }}-GA-bundle-linux64.zip"
+      mode: '0755'
+
+  - name: Create installation directory
+    file:
+      path: "{{ teamwork_cloud_install_dir }}"
+      state: directory
+      mode: '0755'
+      owner: twc
+      group: twc
+
+  - name: Unpack Teamwork Cloud distribution
+    unarchive:
+      src: "/tmp/twc-server-{{ teamwork_cloud_version }}-GA-bundle-linux64.zip"
+      dest: "{{ teamwork_cloud_install_dir }}"
+      remote_src: yes
+      owner: twc
+      group: twc
+      creates: "{{ teamwork_cloud_install_dir }}/twc-server-{{ teamwork_cloud_version }}"
+
+  - name: Update server.xml with database and licensing info
+    template:
+      src: "{{ server_xml_template_path }}"
+      dest: "{{ teamwork_cloud_install_dir }}/twc-server-{{ teamwork_cloud_version }}/conf/server.xml"
+      owner: twc
+      group: twc
+
+  - name: Install Teamwork Cloud service
+    template:
+      src: /path/to/twc.service.j2
+      dest: /etc/systemd/system/twc.service
+      mode: '0644'
+    notify: restart twc
+
+  handlers:
+  - name: restart twc
+    systemd:
+      name: twc
+      state: restarted
+      enabled: yes
