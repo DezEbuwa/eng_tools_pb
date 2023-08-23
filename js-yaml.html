@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YAML File Reader</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.0.0/js-yaml.min.js"></script>
+</head>
+<body>
+  <h1>YAML File Reader</h1>
+  <button id="loadButton">Load YAML</button>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById("loadButton").addEventListener("click", function() {
+      // Create a new XMLHttpRequest object
+      var xhr = new XMLHttpRequest();
+      
+      // Configure the request
+      xhr.open("GET", "data.yaml", true);
+      
+      // Set up a handler for when the request completes
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var yamlData = xhr.responseText;
+          var jsonData = jsyaml.load(yamlData);
+          displayData(jsonData);
+        }
+      };
+      
+      // Send the request
+      xhr.send();
+    });
+
+    function displayData(data) {
+      var outputDiv = document.getElementById("output");
+      outputDiv.innerHTML = "<strong>Name:</strong> " + data.name + "<br>"
+                          + "<strong>Age:</strong> " + data.age + "<br>"
+                          + "<strong>City:</strong> " + data.city;
+    }
+  </script>
+</body>
+</html>
