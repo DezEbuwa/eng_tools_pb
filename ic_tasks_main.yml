@@ -1,0 +1,44 @@
+---
+- name: Install required packages
+  hosts: localhost
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Ensure EPEL repository is enabled (for additional packages)
+      yum_repository:
+        name: epel
+        description: EPEL YUM repository
+        file: epel
+        baseurl: https://download.fedoraproject.org/pub/epel/8/Everything/x86_64/
+        gpgkey: https://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+        enabled: yes
+
+    - name: Install required packages
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker-ce
+        - kubelet
+        - kubeadm
+        - kubectl
+        # Add more packages as needed
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Configure Docker to use systemd as the cgroup driver
+      lineinfile:
+        path: /etc/docker/daemon.json
+        line: '{"exec-opts": ["native.cgroupdriver=systemd"]}'
+      notify: Restart Docker
+
+  handlers:
+    - name: Restart Docker
+      service:
+        name: docker
+        state: restarted
