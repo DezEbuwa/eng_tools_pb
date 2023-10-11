@@ -1,0 +1,3 @@
+---
+dependencies:
+  - name: geerlingguy.docker  # Use a well-maintained Ansible Galaxy role for Docker installation and configuration
