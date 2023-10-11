@@ -1,0 +1,7 @@
+---
+- name: Build Custom RHEL 8 Image for Kubernetes
+  hosts: localhost
+  tasks:
+    - name: Include the custom_k8s_image role
+      include_role:
+        name: custom_k8s_image
