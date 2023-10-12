@@ -1,0 +1,61 @@
+---
+- name: Create and Configure RHV Image for OpenShift
+  hosts: localhost
+  gather_facts: no  # We don't need to gather facts on localhost
+  tasks:
+    - name: Create a VM in RHV
+      rhvm_vm:
+        name: my-openshift-node
+        cluster: my-rhv-cluster
+        template: my-rhv-template
+        cpu: 4
+        memory: 16384
+        disks:
+          - size_gb: 50
+            format: raw
+        state: present
+      delegate_to: localhost
+      vars:
+        ovirt_auth: "{{ ovirt_auth }}"
+      register: vm_result
+
+    - name: Wait for the VM to be up and running
+      wait_for:
+        host: "{{ ovirt_engine }}"
+        port: 443
+        timeout: 600
+        state: started
+      delegate_to: localhost
+      when: vm_result.changed
+
+    - name: Configure the VM
+      community.general.rhvm_vm:
+        name: my-openshift-node
+        nics:
+          - name: eth0
+            profile: my-network-profile
+        disks:
+          - name: "my-openshift-node-{{ item.0.id }}"
+            id: "{{ item.0.id }}"
+            format: raw
+            size_gb: 50
+      delegate_to: localhost
+      vars:
+        ovirt_auth: "{{ ovirt_auth }}"
+      with_items: "{{ vm_result.vms }}"
+      when: vm_result.changed
+
+    - name: Wait for the VM configuration to complete
+      wait_for:
+        timeout: 600
+      delegate_to: localhost
+      when: vm_result.changed
+
+    - name: Create a snapshot of the VM
+      community.general.rhvm_vm_snapshot:
+        name: openshift-base-image
+        vm: my-openshift-node
+        state: present
+      delegate_to: localhost
+      vars:
+        ovirt_auth: "{{ ovirt_auth }}"
