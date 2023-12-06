@@ -1,0 +1,51 @@
+---
+- name: Create admin user and generate SSH key
+  hosts: your_target_hosts
+  become: true
+  vars:
+    admin_user: your_admin_username
+    ssh_key_comment: "your_admin_username@yourdomain.com"
+
+  tasks:
+    - name: Ensure group "wheel" exists
+      ansible.builtin.group:
+        name: wheel
+        state: present
+
+    - name: Create an admin user
+      ansible.builtin.user:
+        name: "{{ admin_user }}"
+        groups: wheel
+        create_home: yes
+        shell: /bin/bash
+
+    - name: Generate SSH key for the admin user
+      ansible.builtin.openssh_keypair:
+        path: "/home/{{ admin_user }}/.ssh/id_rsa"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        force: no
+        comment: "{{ ssh_key_comment }}"
+
+    - name: Set proper permissions for .ssh directory
+      ansible.builtin.file:
+        path: "/home/{{ admin_user }}/.ssh"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: '0700'
+
+    - name: Set proper permissions for the private key
+      ansible.builtin.file:
+        path: "/home/{{ admin_user }}/.ssh/id_rsa"
+        owner: "{{ admin_user }}"
+        group: "{{ admin_user }}"
+        mode: '0600'
+
+    - name: Display public key
+      ansible.builtin.command:
+        cmd: cat /home/{{ admin_user }}/.ssh/id_rsa.pub
+      register: ssh_pub_key
+
+    - name: Print the public key for the admin user
+      ansible.builtin.debug:
+        msg: "Public key for user {{ admin_user }} is: {{ ssh_pub_key.stdout }}"
