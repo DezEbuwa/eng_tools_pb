@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Define the playbook file name
+PLAYBOOK_FILE="my_playbook.yml"
+
+# Check if the playbook file exists
+if [ ! -f "$PLAYBOOK_FILE" ]; then
+    echo "Playbook file not found: $PLAYBOOK_FILE"
+    exit 1
+fi
+
+# Run the Ansible playbook
+echo "Running Ansible playbook: $PLAYBOOK_FILE"
+ansible-playbook "$PLAYBOOK_FILE"
+
+# Check if the playbook run was successful
+if [ $? -eq 0 ]; then
+    echo "Ansible playbook executed successfully."
+else
+    echo "Ansible playbook execution failed."
+    exit 1
+fi
