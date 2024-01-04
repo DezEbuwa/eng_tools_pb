@@ -1,0 +1,16 @@
+---
+- name: Change User Password on All Hosts
+  hosts: all
+  become: yes
+  tasks:
+    - name: Change the user's password
+      user:
+        name: "{{ user_to_change_password }}"
+        password: "{{ new_password | password_hash('sha512') }}"
+        update_password: always
+      vars_prompt:
+        - name: new_password
+          prompt: "Enter the new password for {{ user_to_change_password }}"
+          private: yes
+      vars:
+        user_to_change_password: "username"  # Replace with the target username
