@@ -1,0 +1,28 @@
+---
+# tasks file for active_directory
+- name: Install required packages
+  apt:
+    name:
+      - sssd
+      - sssd-tools
+      - libnss-sss
+      - libpam-sss
+      - adcli
+      - realmd
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Join to Active Directory
+  shell: echo {{ ad_password }} | realm join --user={{ ad_username }} --computer-ou={{ ad_ou }} {{ ad_domain }}
+  register: join_domain
+  failed_when: join_domain.rc not in [0, 1]
+  notify: Restart SSSD
+
+- name: Configure SSSD
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: '0600'
+  notify: Restart SSSD
