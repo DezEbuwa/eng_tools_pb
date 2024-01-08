@@ -1,0 +1,6 @@
+---
+# defaults file for active_directory
+ad_domain: 'example.com'
+ad_username: 'admin'
+ad_password: 'password'
+ad_ou: 'OU=Users,DC=example,DC=com' # Organizational Unit in AD
