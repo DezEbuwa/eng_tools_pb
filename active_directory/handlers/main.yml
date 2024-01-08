@@ -1,0 +1,6 @@
+---
+# handlers file for active_directory
+- name: Restart SSSD
+  service:
+    name: sssd
+    state: restarted
