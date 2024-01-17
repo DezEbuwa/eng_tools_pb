@@ -1,0 +1,20 @@
+---
+- name: Docker Image Management Playbook
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Pull Docker image from registry
+      docker_image:
+        name: "your-registry/your-image:your-tag"
+        source: pull
+
+    - name: Save the Docker image to a file
+      command: "docker save your-registry/your-image:your-tag | gzip > /path/to/your-image.tar.gz"
+
+    - name: Push Docker image to a different registry
+      docker_image:
+        name: "your-registry/your-image:your-tag"
+        load_path: "/path/to/your-image.tar.gz"
+        push: yes
+        repository: "different-registry/your-image"
+        tag: "your-tag"
