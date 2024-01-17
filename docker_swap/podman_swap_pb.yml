@@ -1,0 +1,24 @@
+---
+- name: Podman Image Management Playbook
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Pull Podman image from registry
+      community.general.podman_image:
+        name: "your-registry/your-image:your-tag"
+        state: present
+
+    - name: Save the Podman image to a file
+      shell: "podman save your-registry/your-image:your-tag | gzip > /path/to/your-image.tar.gz"
+
+    - name: Load image from file to Podman
+      shell: "gunzip -c /path/to/your-image.tar.gz | podman load"
+
+    - name: Tag the image for the new registry
+      shell: "podman tag your-registry/your-image:your-tag different-registry/your-image:your-tag"
+
+    - name: Push Podman image to a different registry
+      community.general.podman_image:
+        name: "different-registry/your-image:your-tag"
+        push: yes
+        format: oci
