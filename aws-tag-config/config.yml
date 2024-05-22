@@ -1,0 +1,29 @@
+---
+- name: Configure AWS EC2 tags
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    aws_region: us-east-1
+
+  tasks:
+    - name: Read tag configuration from JSON file
+      set_fact:
+        tag_config: "{{ lookup('file', 'tag_config.json') | from_json }}"
+
+    - name: Configure EC2 tags
+      ec2_tag:
+        region: "{{ aws_region }}"
+        resource: "{{ item.resource_id }}"
+        tags: "{{ item.tags }}"
+        state: "{{ item.state | default('present') }}"
+      loop: "{{ tag_config }}"
+
+    - name: Remove EC2 tags
+      ec2_tag:
+        region: "{{ aws_region }}"
+        resource: "{{ item.resource_id }}"
+        tags: "{{ item.tags_to_remove }}"
+        state: absent
+      loop: "{{ tag_config }}"
+      when: item.tags_to_remove is defined
