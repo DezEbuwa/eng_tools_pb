@@ -155,3 +155,6 @@ Ensure you have the following files in your GitLab repository:
 4. Any additional scripts or files referenced in your Packer template or Ansible playbooks.
 
 With this setup, when you push changes to your GitLab repository, the CI/CD pipeline will run, build the RHEL 9 QCOW2 image using Packer, apply the Ansible playbooks, and save the resulting image as an artifact.
+
+
+PACKER_LOG=1 CHECKPOINT_DISABLE=1 /usr/local/bin/packer.io/packer build --force base-image.pkr.hcl | tee lin_packer.log
