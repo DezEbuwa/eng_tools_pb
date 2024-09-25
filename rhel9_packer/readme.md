@@ -158,3 +158,4 @@ With this setup, when you push changes to your GitLab repository, the CI/CD pipe
 
 
 PACKER_LOG=1 CHECKPOINT_DISABLE=1 /usr/local/bin/packer.io/packer build --force base-image.pkr.hcl | tee lin_packer.log
+https://gist.github.com/bkmetzler/d17fc843d35e2b5881a1a482efd88ac9
