@@ -7,9 +7,9 @@ users:
   groups: sudo
   sudo: ALL=(ALL) NOPASSWD:ALL
   shell: /bin/bash
-  lock_passwd: true
-  ssh_authorized_keys:
-   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAA...
+  # lock_passwd: true
+  # ssh_authorized_keys:
+  #  - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAA...
 
 package_update: true
 package_upgrade: true

@@ -1,0 +1,33 @@
+[1;32mqemu.template: output will be in this color.[0m
+
+[1;32m==> qemu.template: Retrieving ISO[0m
+[1;32m==> qemu.template: Trying ./iso/rhel9_soft.qcow2[0m
+[1;32m==> qemu.template: Trying ./iso/rhel9_soft.qcow2?checksum=sha256%3A334054290e6c841abed6a06fe44640cf5649ca30d7a4eb2a46395aa7c919e286[0m
+[1;32m==> qemu.template: ./iso/rhel9_soft.qcow2?checksum=sha256%3A334054290e6c841abed6a06fe44640cf5649ca30d7a4eb2a46395aa7c919e286 => /home/dez/packer-qemu/iso/rhel9_soft.qcow2[0m
+[1;32m==> qemu.template: Creating CD disk...[0m
+[0;32m    qemu.template: Warning: creating filesystem with Joliet extensions but without Rock Ridge[0m
+[0;32m    qemu.template: extensions. It is highly recommended to add Rock Ridge.[0m
+[0;32m    qemu.template: I: -input-charset not specified, using utf-8 (detected in locale settings)[0m
+[0;32m    qemu.template: Total translation table size: 0[0m
+[0;32m    qemu.template: Total rockridge attributes bytes: 0[0m
+[0;32m    qemu.template: Total directory bytes: 0[0m
+[0;32m    qemu.template: Path table size(bytes): 10[0m
+[0;32m    qemu.template: Max brk space used 0[0m
+[0;32m    qemu.template: 188 extents written (0 MB)[0m
+[0;32m    qemu.template: Done copying paths from CD_dirs[0m
+[0;32m    qemu.template: File extension already matches desired output format. Skipping qemu-img convert step[0m
+[1;32m==> qemu.template: Resizing hard drive...[0m
+[1;32m==> qemu.template: Starting HTTP server on port 8140[0m
+[1;32m==> qemu.template: Creating temporary RSA SSH key for instance...[0m
+[1;32m==> qemu.template: Looking for available port between 5900 and 5999 on 127.0.0.1[0m
+[1;32m==> qemu.template: Starting VM, booting disk image[0m
+[0;32m    qemu.template: The VM will be run headless, without a GUI. If you want to
+    qemu.template: view the screen of the VM, connect via VNC without a password to
+    qemu.template: vnc://127.0.0.1:5926[0m
+[1;32m==> qemu.template: Overriding default Qemu arguments with qemuargs template option...[0m
+[1;32m==> qemu.template: Waiting 2m0s for boot...[0m
+[1;32m==> qemu.template: Connecting to VM via VNC (127.0.0.1:5926)[0m
+[1;32m==> qemu.template: Typing the boot commands over VNC...[0m
+[0;32m    qemu.template: Not using a NetBridge -- skipping StepWaitGuestAddress[0m
+[1;32m==> qemu.template: Using SSH communicator to connect: 127.0.0.1[0m
+[1;32m==> qemu.template: Waiting for SSH to become available...[0m
