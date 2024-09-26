@@ -1,0 +1,3 @@
+rhel9_packer/iso/rhel-9.4-x86_64-boot.iso
+rhel9_packer/iso/rhel9_soft.qcow2
+rhel9_packer/output/galaxy-rhel9-vm.qcow2
