@@ -1,74 +1,169 @@
-Here’s how you can structure a GitLab CI/CD pipeline to achieve what you want: using Syft to generate a CycloneDX SBOM, saving the SBOM as an artifact, and then using that artifact in another job to create a bundle with your custom software package.
+To build an offline searchable knowledgebase in Angular using a JSON file, you can follow these steps. I'll provide a basic starter structure to get you going.
 
-### 1. **Pipeline Structure**
+### 1. **Project Setup**
 
-The pipeline will have two main jobs:
-- **Job 1:** Create the SBOM using Syft and save it as a CycloneDX SBOM artifact.
-- **Job 2:** Download the SBOM artifact and use it to create a bundle with your custom software.
+First, create a new Angular project if you haven't already:
 
-### 2. **Sample `.gitlab-ci.yml`**
-
-```yaml
-stages:
-  - generate-sbom
-  - create-bundle
-
-variables:
-  SBOM_FILE: "sbom.json"
-
-# Job 1: Generate CycloneDX SBOM
-generate_sbom:
-  stage: generate-sbom
-  image: anchore/syft:latest
-  script:
-    - syft . -o cyclonedx-json > $SBOM_FILE
-  artifacts:
-    paths:
-      - $SBOM_FILE
-    expire_in: 1 week
-  only:
-    - branches  # Run on all branches (or you can specify only specific branches)
-
-# Job 2: Use SBOM to create a bundle
-create_bundle:
-  stage: create-bundle
-  image: registry.gitlab.com/your-image:latest  # Your custom software package container
-  dependencies:
-    - generate_sbom
-  script:
-    - echo "SBOM downloaded. Creating a bundle using the SBOM..."
-    - ./your-custom-software --input $SBOM_FILE --output bundle.tar.gz  # Your bundle command
-  artifacts:
-    paths:
-      - bundle.tar.gz
-    expire_in: 1 week
-  only:
-    - branches
+```bash
+ng new knowledgebase-app
+cd knowledgebase-app
 ```
 
-### 3. **Explanation of Key Sections**
+### 2. **Structure of the JSON File**
 
-- **Stages:**
-  - `generate-sbom`: This stage generates the SBOM using Syft.
-  - `create-bundle`: This stage takes the SBOM artifact and runs your custom software to create a bundle.
+Your JSON file will act as your data source. Let's assume your knowledgebase consists of articles, and each article has an `id`, `title`, `content`, and `tags`. Here's an example `knowledgebase.json`:
 
-- **Job 1: Generate SBOM**
-  - **Image:** The job uses the `anchore/syft` image to generate the SBOM.
-  - **Script:** Runs the `syft . -o cyclonedx-json` command to create the CycloneDX SBOM in JSON format, saving it as `sbom.json`.
-  - **Artifacts:** The generated `sbom.json` file is saved as an artifact for use in later jobs, with a retention period of one week.
+```json
+[
+  {
+    "id": 1,
+    "title": "Getting Started with Angular",
+    "content": "Angular is a platform and framework for building single-page client applications using HTML and TypeScript.",
+    "tags": ["Angular", "Beginner", "Frontend"]
+  },
+  {
+    "id": 2,
+    "title": "Understanding Components",
+    "content": "Components are the basic building blocks of Angular applications. Each component is an independent block of the larger system.",
+    "tags": ["Angular", "Components", "Frontend"]
+  }
+]
+```
 
-- **Job 2: Create Bundle**
-  - **Image:** This job uses your custom Docker image (replace `registry.gitlab.com/your-image:latest` with the actual image path) that contains the software to create the bundle.
-  - **Dependencies:** This ensures that the `create_bundle` job depends on the `generate_sbom` job and downloads the SBOM artifact from that job.
-  - **Script:** This runs your custom command to process the SBOM and create the bundle. Replace `./your-custom-software --input $SBOM_FILE --output bundle.tar.gz` with the actual command for your software.
-  - **Artifacts:** The generated bundle is saved as an artifact (`bundle.tar.gz`) for later use or download.
+### 3. **Create a Service to Load JSON**
 
-### 4. **Custom Software Package**
+In your Angular project, create a service to load and search through this JSON file.
 
-Make sure your custom software package (used in the `create_bundle` job) is packaged in a Docker container and hosted either in GitLab’s Container Registry or another container registry. The software should accept the SBOM file as input and generate the bundle you need.
+```bash
+ng generate service knowledgebase
+```
 
-### 5. **Testing and Iterating**
+In the generated `knowledgebase.service.ts`, add the following code:
 
-Once you have your `.gitlab-ci.yml` in place, test it by pushing to your GitLab repository and observing the pipeline execution. Adjust the paths and software commands as necessary for your specific setup.
+```typescript
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-This structure provides a robust workflow to generate, store, and utilize the SBOM, which aligns well with DevSecOps and software supply chain security practices.
+@Injectable({
+  providedIn: 'root'
+})
+export class KnowledgebaseService {
+
+  private jsonUrl = 'assets/knowledgebase.json'; // Path to your JSON file
+
+  constructor(private http: HttpClient) { }
+
+  getKnowledgebase(): Observable<any[]> {
+    return this.http.get<any[]>(this.jsonUrl);
+  }
+}
+```
+
+### 4. **Add the JSON File to Assets**
+
+Place your `knowledgebase.json` file in the `src/assets/` directory of your Angular project.
+
+### 5. **Create a Component to Display and Search Data**
+
+Generate a component where you will display and search through the articles.
+
+```bash
+ng generate component knowledgebase-list
+```
+
+In `knowledgebase-list.component.ts`, use the service to fetch and filter the data:
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+import { KnowledgebaseService } from '../knowledgebase.service';
+
+@Component({
+  selector: 'app-knowledgebase-list',
+  templateUrl: './knowledgebase-list.component.html',
+  styleUrls: ['./knowledgebase-list.component.css']
+})
+export class KnowledgebaseListComponent implements OnInit {
+  articles: any[] = [];
+  searchTerm: string = '';
+
+  constructor(private kbService: KnowledgebaseService) { }
+
+  ngOnInit(): void {
+    this.kbService.getKnowledgebase().subscribe(data => {
+      this.articles = data;
+    });
+  }
+
+  filterArticles() {
+    if (!this.searchTerm) {
+      return this.articles;
+    }
+
+    return this.articles.filter(article =>
+      article.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      article.content.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      article.tags.some((tag: string) => tag.toLowerCase().includes(this.searchTerm.toLowerCase()))
+    );
+  }
+}
+```
+
+### 6. **Create the HTML Template**
+
+In `knowledgebase-list.component.html`, add a search box and display the filtered articles:
+
+```html
+<div>
+  <input type="text" [(ngModel)]="searchTerm" placeholder="Search the knowledgebase" />
+</div>
+
+<div *ngFor="let article of filterArticles()">
+  <h3>{{ article.title }}</h3>
+  <p>{{ article.content }}</p>
+  <ul>
+    <li *ngFor="let tag of article.tags">{{ tag }}</li>
+  </ul>
+  <hr />
+</div>
+```
+
+### 7. **Import Necessary Modules**
+
+Ensure you have the `HttpClientModule` and `FormsModule` imported in your `AppModule` (`app.module.ts`):
+
+```typescript
+import { BrowserModule } from '@angular/platform-browser';
+import { NgModule } from '@angular/core';
+import { AppComponent } from './app.component';
+import { HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { KnowledgebaseListComponent } from './knowledgebase-list/knowledgebase-list.component';
+
+@NgModule({
+  declarations: [
+    AppComponent,
+    KnowledgebaseListComponent
+  ],
+  imports: [
+    BrowserModule,
+    HttpClientModule,
+    FormsModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+### 8. **Run the Application**
+
+Finally, run your application:
+
+```bash
+ng serve
+```
+
+You should now have a basic offline searchable knowledgebase in Angular using a JSON file as your data source. The articles are displayed, and you can search through them using the search box.
+
+This starter can be expanded upon, with features like advanced filtering, categorization, and more.
