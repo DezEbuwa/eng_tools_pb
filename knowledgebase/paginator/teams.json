@@ -1,0 +1,82 @@
+[
+    {
+        "id": "florida-state",
+        "title": "Florida State University",
+        "sub": "This is a university in Tallahassee, FL",
+        "file": "florida-state.md",
+        "creationDate": "12/4/2024",
+        "tags": ["fsu", "tallahassee", "seminoles"]
+    },
+    {
+        "id": "alabama",
+        "title": "University of Alabama",
+        "sub": "This is a university in Tuscaloosa, AL",
+        "file": "alabama.md",
+        "creationDate": "12/4/2024",
+        "tags": ["alabama", "crimson-tide", "tuscaloosa"]
+    },
+    {
+        "id": "ohio-state",
+        "title": "The Ohio State University",
+        "sub": "This is a university in Columbus, OH",
+        "file": "ohio-state.md",
+        "creationDate": "12/4/2024",
+        "tags": ["osu", "buckeyes", "columbus"]
+    },
+    {
+        "id": "michigan",
+        "title": "University of Michigan",
+        "sub": "This is a university in Ann Arbor, MI",
+        "file": "michigan.md",
+        "creationDate": "12/4/2024",
+        "tags": ["michigan", "wolverines", "ann-arbor"]
+    },
+    {
+        "id": "texas",
+        "title": "University of Texas at Austin",
+        "sub": "This is a university in Austin, TX",
+        "file": "texas.md",
+        "creationDate": "12/4/2024",
+        "tags": ["texas", "longhorns", "austin"]
+    },
+    {
+        "id": "georgia",
+        "title": "University of Georgia",
+        "sub": "This is a university in Athens, GA",
+        "file": "georgia.md",
+        "creationDate": "12/4/2024",
+        "tags": ["georgia", "bulldogs", "athens"]
+    },
+    {
+        "id": "clemson",
+        "title": "Clemson University",
+        "sub": "This is a university in Clemson, SC",
+        "file": "clemson.md",
+        "creationDate": "12/4/2024",
+        "tags": ["clemson", "tigers", "south-carolina"]
+    },
+    {
+        "id": "notre-dame",
+        "title": "University of Notre Dame",
+        "sub": "This is a university in Notre Dame, IN",
+        "file": "notre-dame.md",
+        "creationDate": "12/4/2024",
+        "tags": ["notre-dame", "fighting-irish", "indiana"]
+    },
+    {
+        "id": "lsu",
+        "title": "Louisiana State University",
+        "sub": "This is a university in Baton Rouge, LA",
+        "file": "lsu.md",
+        "creationDate": "12/4/2024",
+        "tags": ["lsu", "tigers", "baton-rouge"]
+    },
+    {
+        "id": "usc",
+        "title": "University of Southern California",
+        "sub": "This is a university in Los Angeles, CA",
+        "file": "usc.md",
+        "creationDate": "12/4/2024",
+        "tags": ["usc", "trojans", "los-angeles"]
+    }
+]
