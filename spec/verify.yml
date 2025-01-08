@@ -1,0 +1,38 @@
+- name: Verify Azure Deployment
+  hosts: localhost
+  gather_facts: no
+  vars:
+    spec_file: "spec.json"
+  tasks:
+    - name: Load specification
+      include_vars:
+        file: "{{ spec_file }}"
+        name: spec
+
+    - name: Verify endpoints
+      azure_rm_publicip_info:
+      register: azure_endpoints
+
+    - name: Check endpoints compliance
+      debug:
+        msg: "Checking endpoint: {{ item.name }}"
+      with_items: "{{ spec.endpoints }}"
+
+    - name: Verify network configuration
+      azure_rm_virtualnetwork_info:
+        name: "{{ spec.network_configuration.vnet_name }}"
+        resource_group: "myResourceGroup"
+      register: vnet_info
+
+    - name: Compare network configuration
+      debug:
+        msg: "Expected subnets: {{ spec.network_configuration.subnets }}"
+
+    - name: Verify running servers
+      azure_rm_vm_info:
+      register: azure_vms
+
+    - name: Check running servers compliance
+      debug:
+        msg: "Checking server: {{ item.name }}"
+      with_items: "{{ spec.running_servers }}"
