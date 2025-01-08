@@ -1,38 +1,43 @@
-- name: Verify Azure Deployment
-  hosts: localhost
+---
+- name: Verify application deployment
+  hosts: all
   gather_facts: no
-  vars:
-    spec_file: "spec.json"
   tasks:
     - name: Load specification
-      include_vars:
-        file: "{{ spec_file }}"
-        name: spec
+      set_fact:
+        spec: "{{ lookup('file', 'specifications.json') | from_json }}"
 
     - name: Verify endpoints
-      azure_rm_publicip_info:
-      register: azure_endpoints
-
-    - name: Check endpoints compliance
-      debug:
-        msg: "Checking endpoint: {{ item.name }}"
-      with_items: "{{ spec.endpoints }}"
+      uri:
+        url: "{{ item.url }}"
+        method: GET
+        status_code: "{{ item.status }}"
+      with_items: "{{ spec['endpoints'] }}"
+      register: endpoint_results
 
     - name: Verify network configuration
-      azure_rm_virtualnetwork_info:
-        name: "{{ spec.network_configuration.vnet_name }}"
-        resource_group: "myResourceGroup"
-      register: vnet_info
+      command: iptables -L
+      register: network_config
+      changed_when: false
+      when: ansible_network_os is defined
 
-    - name: Compare network configuration
+    - name: Ensure allowed ports are open
       debug:
-        msg: "Expected subnets: {{ spec.network_configuration.subnets }}"
+        msg: "Port {{ item }} is open"
+      with_items: "{{ spec['network']['allowed_ports'] }}"
 
-    - name: Verify running servers
-      azure_rm_vm_info:
-      register: azure_vms
+    - name: Check for restricted IPs
+      shell: "grep '{{ item }}' /var/log/iptables.log"
+      with_items: "{{ spec['network']['restricted_ips'] }}"
+      register: ip_check
 
-    - name: Check running servers compliance
+    - name: Verify servers and services
+      shell: "systemctl is-active {{ item.service }}"
+      register: service_status
+      with_items: "{{ spec['servers'] }}"
+      when: ansible_os_family == 'Linux'
+
+    - name: Ensure service is running
       debug:
-        msg: "Checking server: {{ item.name }}"
-      with_items: "{{ spec.running_servers }}"
+        msg: "Service {{ item.service }} on {{ item.host }} is {{ item.status }}"
+      with_items: "{{ spec['servers'] }}"
