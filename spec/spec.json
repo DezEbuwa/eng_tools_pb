@@ -1,0 +1,41 @@
+{
+  "endpoints": [
+    {
+      "name": "webapp",
+      "ip": "52.123.45.67",
+      "port": 443
+    },
+    {
+      "name": "api",
+      "ip": "52.123.45.68",
+      "port": 8080
+    }
+  ],
+  "network_configuration": {
+    "vnet_name": "myVNet",
+    "subnets": [
+      {
+        "name": "subnet1",
+        "address_prefix": "10.0.1.0/24"
+      },
+      {
+        "name": "subnet2",
+        "address_prefix": "10.0.2.0/24"
+      }
+    ]
+  },
+  "running_servers": [
+    {
+      "name": "web-server",
+      "vm_size": "Standard_B2s",
+      "os": "Linux",
+      "state": "running"
+    },
+    {
+      "name": "db-server",
+      "vm_size": "Standard_B2s",
+      "os": "Windows",
+      "state": "running"
+    }
+  ]
+}
