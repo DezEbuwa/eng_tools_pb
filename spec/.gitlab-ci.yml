@@ -1,0 +1,22 @@
+stages:
+  - verify
+
+variables:
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  ANSIBLE_RETRY_FILES_ENABLED: "False"
+  SPEC_FILE: "spec.json"
+
+verify_azure_deployment:
+  stage: verify
+  image: "willhallonline/ansible:latest"  # Lightweight Ansible Docker image
+  before_script:
+    - apt-get update -y && apt-get install -y python3-pip
+    - pip3 install azure-cli==2.52.0 azure-mgmt-resource ansible[azure]
+    - az login --service-principal -u "$AZURE_CLIENT_ID" -p "$AZURE_CLIENT_SECRET" --tenant "$AZURE_TENANT_ID"
+  script:
+    - ansible-playbook -i localhost, -c local verify_azure.yml
+  artifacts:
+    paths:
+      - ansible.log
+  only:
+    - main
