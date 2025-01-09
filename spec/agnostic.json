@@ -1,0 +1,92 @@
+{
+  "environment": {
+    "name": "Generic Environment",
+    "description": "Platform-agnostic environment for deploying applications",
+    "region": "global",
+    "resources": {
+      "services": [
+        {
+          "name": "Database",
+          "type": "SQL",
+          "tier": "Standard",
+          "endpoints": {
+            "primary": "db.example.local:5432",
+            "backup": "db-backup.example.local:5432"
+          },
+          "config": {
+            "max_connections": 200,
+            "encryption": true
+          }
+        },
+        {
+          "name": "Cache",
+          "type": "In-Memory",
+          "endpoints": {
+            "primary": "cache.example.local:6379"
+          },
+          "config": {
+            "max_memory": "4GB",
+            "eviction_policy": "allkeys-lru"
+          }
+        }
+      ],
+      "servers": [
+        {
+          "name": "Frontend Server",
+          "type": "medium",
+          "os": "Linux",
+          "roles": ["frontend"],
+          "endpoints": {
+            "http": "http://frontend.example.local",
+            "https": "https://frontend.example.local"
+          }
+        },
+        {
+          "name": "Backend Server",
+          "type": "large",
+          "os": "Linux",
+          "roles": ["backend"],
+          "endpoints": {
+            "internal": "http://backend.example.local"
+          }
+        }
+      ]
+    },
+    "network": {
+      "config": {
+        "subnets": [
+          {
+            "name": "PublicSubnet",
+            "cidr_block": "192.168.1.0/24"
+          },
+          {
+            "name": "PrivateSubnet",
+            "cidr_block": "192.168.2.0/24"
+          }
+        ],
+        "firewall_rules": [
+          {
+            "description": "Allow HTTP/HTTPS traffic",
+            "protocol": "TCP",
+            "ports": ["80", "443"],
+            "source": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "user_access": {
+      "roles": [
+        {
+          "name": "Admin",
+          "permissions": ["read", "write", "manage"],
+          "assigned_to": ["admin@example.com"]
+        },
+        {
+          "name": "User",
+          "permissions": ["read", "execute"],
+          "assigned_to": ["user@example.com"]
+        }
+      ]
+    }
+  }
+}
