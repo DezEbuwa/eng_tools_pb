@@ -1,0 +1,144 @@
+<!-- network-config.component.html -->
+<form [formGroup]="configForm" (ngSubmit)="onSubmit()">
+  <!-- Subnets Table -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Subnets</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="subnetDataSource" class="mat-elevation-z2">
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let subnet">
+            <mat-form-field>
+              <input matInput [(ngModel)]="subnet.name" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- CIDR Column -->
+        <ng-container matColumnDef="cidr">
+          <th mat-header-cell *matHeaderCellDef>CIDR</th>
+          <td mat-cell *matCellDef="let subnet">
+            <mat-form-field>
+              <input matInput [(ngModel)]="subnet.cidr" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Description Column -->
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Description</th>
+          <td mat-cell *matCellDef="let subnet">
+            <mat-form-field>
+              <input matInput [(ngModel)]="subnet.description" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let subnet; let i = index">
+            <button mat-icon-button color="warn" (click)="removeSubnet(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="subnetColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: subnetColumns;"></tr>
+      </table>
+
+      <button mat-raised-button color="primary" type="button" (click)="addSubnet()">
+        Add Subnet
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Firewall Rules Table -->
+  <mat-card class="mt-4">
+    <mat-card-header>
+      <mat-card-title>Firewall Rules</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="firewallDataSource" class="mat-elevation-z2">
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td mat-cell *matCellDef="let rule">
+            <mat-form-field>
+              <input matInput [(ngModel)]="rule.name" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Source IP Column -->
+        <ng-container matColumnDef="sourceIp">
+          <th mat-header-cell *matHeaderCellDef>Source IP</th>
+          <td mat-cell *matCellDef="let rule">
+            <mat-form-field>
+              <input matInput [(ngModel)]="rule.sourceIp" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Destination IP Column -->
+        <ng-container matColumnDef="destinationIp">
+          <th mat-header-cell *matHeaderCellDef>Destination IP</th>
+          <td mat-cell *matCellDef="let rule">
+            <mat-form-field>
+              <input matInput [(ngModel)]="rule.destinationIp" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Port Column -->
+        <ng-container matColumnDef="port">
+          <th mat-header-cell *matHeaderCellDef>Port</th>
+          <td mat-cell *matCellDef="let rule">
+            <mat-form-field>
+              <input matInput type="number" [(ngModel)]="rule.port" [ngModelOptions]="{standalone: true}">
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Protocol Column -->
+        <ng-container matColumnDef="protocol">
+          <th mat-header-cell *matHeaderCellDef>Protocol</th>
+          <td mat-cell *matCellDef="let rule">
+            <mat-form-field>
+              <mat-select [(ngModel)]="rule.protocol" [ngModelOptions]="{standalone: true}">
+                <mat-option value="TCP">TCP</mat-option>
+                <mat-option value="UDP">UDP</mat-option>
+                <mat-option value="ICMP">ICMP</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>Actions</th>
+          <td mat-cell *matCellDef="let rule; let i = index">
+            <button mat-icon-button color="warn" (click)="removeFirewallRule(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="firewallColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: firewallColumns;"></tr>
+      </table>
+
+      <button mat-raised-button color="primary" type="button" (click)="addFirewallRule()">
+        Add Firewall Rule
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="mt-4">
+    <button mat-raised-button color="primary" type="submit">Submit</button>
+  </div>
+</form>
