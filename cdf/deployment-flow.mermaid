@@ -1,0 +1,42 @@
+flowchart TD
+    subgraph Input ["Team Input"]
+        A1["Configuration File"] --> A2["Environment Requirements"]
+        A3["SBOM (CycloneDX)"] --> A4["Dependencies & Security Info"]
+        A2 --> B1
+        A4 --> B1
+    end
+
+    B1["Create Security Approval Request"] --> C1{"Security Review"}
+    
+    C1 -->|Approved| D1["Provision Staging Environment"]
+    C1 -->|Rejected| R1["Return to Team for Updates"]
+    R1 --> B1
+
+    D1 --> E1["Run Automated Tests"]
+    
+    subgraph Validation ["Environment Validation"]
+        E1 --> F1{"All Tests Pass?"}
+        F1 -->|Yes| G1["Team Verification"]
+        F1 -->|No| H1["Address Issues"]
+        H1 --> D1
+        
+        G1 --> I1{"Team Approves?"}
+        I1 -->|Yes| J1["Teardown Staging"]
+        I1 -->|No| H1
+    end
+    
+    J1 --> K1["Deploy to Production"]
+    
+    subgraph Ops ["Operations Tasks"]
+        K1 --> L1["Create Ops Request"]
+        L1 --> M1["Configure DNS"]
+        L1 --> M2["Set Up User Accounts"]
+        L1 --> M3["Additional Manual Config"]
+    end
+
+    style Input fill:#e1f3d8
+    style Validation fill:#f0e68c
+    style Ops fill:#d8e1f3
+    
+    classDef decision fill:#ffe6cc,stroke:#d79b00
+    class C1,F1,I1 decision
