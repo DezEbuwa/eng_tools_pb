@@ -1,0 +1,78 @@
+Absolutely! Here’s a complete `.gitlab-ci.yml` file tailored for your setup with **Podman**, pushing to **Harbor**, and building your full-stack app (Angular + FastAPI + SQLite) from a **monorepo** structure.
+
+---
+
+### ✅ `.gitlab-ci.yml`
+
+```yaml
+stages:
+  - build
+  - push
+
+variables:
+  IMAGE_NAME: harbor.example.com/myproject/my-app
+  TAG: $CI_COMMIT_SHORT_SHA
+
+# Podman-in-Docker image (or install manually if using custom runner)
+build:
+  stage: build
+  image: quay.io/podman/stable
+  before_script:
+    - echo "Using Podman version:"
+    - podman --version
+  script:
+    # Optional: debug build context
+    - ls -la
+    # Build the container image with Podman
+    - podman build -t $IMAGE_NAME:$TAG -t $IMAGE_NAME:latest .
+  artifacts:
+    paths:
+      - .podman/images # optional for caching
+    expire_in: 1 hour
+
+push:
+  stage: push
+  image: quay.io/podman/stable
+  script:
+    - echo "$HARBOR_PASSWORD" | podman login harbor.example.com -u "$HARBOR_USERNAME" --password-stdin
+    - podman push $IMAGE_NAME:$TAG
+    - podman push $IMAGE_NAME:latest
+  only:
+    - main  # or "master", or remove this line to run on every commit
+```
+
+---
+
+### 🔐 GitLab CI/CD Variables (set in your repo under Settings → CI/CD → Variables):
+
+| Variable           | Description                   |
+|--------------------|-------------------------------|
+| `HARBOR_USERNAME`  | Your Harbor registry username |
+| `HARBOR_PASSWORD`  | Harbor password or robot token|
+
+---
+
+### 🧱 Dockerfile Path
+
+Ensure the `Dockerfile` is at the **root** of your repo, or update the build command like:
+
+```yaml
+- podman build -f path/to/Dockerfile -t $IMAGE_NAME:$TAG .
+```
+
+---
+
+### ✅ Optional Improvements
+
+- **Trigger only on certain branches or tags**:
+  ```yaml
+  only:
+    - main
+    - tags
+  ```
+
+- **Add cache for faster builds** using a Podman volume or GitLab cache (can add later if builds get long).
+
+- **Enable CI/CD for merge requests** to preview changes.
+
+---
