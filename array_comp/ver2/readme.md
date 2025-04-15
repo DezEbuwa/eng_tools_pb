@@ -1,3 +1,4 @@
+```js
 let normalizeVersion = (input) => {
  input = input.toLowerCase().trim();
 
@@ -28,3 +29,4 @@ let normalizeVersion = (input) => {
 
   return input;
 }
+```
